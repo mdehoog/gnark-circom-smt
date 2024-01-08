@@ -6,6 +6,8 @@ import (
 	"github.com/liyue201/gnark-circomlib/circuits"
 )
 
+// based on https://github.com/iden3/circomlib/blob/master/circuits/smt/smthash_poseidon.circom
+
 func Hash1(api frontend.API, key, value frontend.Variable) frontend.Variable {
 	inputs := []frontend.Variable{key, value, 1}
 	return circuits.Poseidon(api, inputs)

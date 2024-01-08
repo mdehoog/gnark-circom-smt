@@ -6,6 +6,8 @@ import (
 	"github.com/liyue201/gnark-circomlib/circuits"
 )
 
+// based on https://github.com/iden3/circomlib/blob/cff5ab6288b55ef23602221694a6a38a0239dcc0/circuits/smt/smtprocessor.circom
+
 func Processor(api frontend.API, oldRoot frontend.Variable, siblings []frontend.Variable, oldKey, oldValue, isOld0, newKey, newValue, fnc0, fnc1 frontend.Variable) (newRoot frontend.Variable) {
 	levels := len(siblings)
 	enabled := api.Sub(api.Add(fnc0, fnc1), api.Mul(fnc0, fnc1))

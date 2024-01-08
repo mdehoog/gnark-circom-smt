@@ -2,6 +2,8 @@ package smt
 
 import "github.com/consensys/gnark/frontend"
 
+// based on https://github.com/iden3/circomlib/blob/master/circuits/smt/smtlevins.circom
+
 func LevIns(api frontend.API, enabled frontend.Variable, siblings []frontend.Variable) (levIns []frontend.Variable) {
 	levels := len(siblings)
 	levIns = make([]frontend.Variable, levels)

@@ -6,6 +6,8 @@ import (
 	"github.com/liyue201/gnark-circomlib/circuits"
 )
 
+// based on https://github.com/iden3/circomlib/blob/cff5ab6288b55ef23602221694a6a38a0239dcc0/circuits/smt/smtprocessorlevel.circom
+
 func ProcessorLevel(api frontend.API, stTop, stOld0, stBot, stNew1, stUpd, sibling, old1leaf, new1leaf, newlrbit, oldChild, newChild frontend.Variable) (oldRoot, newRoot frontend.Variable) {
 	oldProofHashL, oldProofHashR := circuits.Switcher(api, newlrbit, oldChild, sibling)
 	oldProofHash := Hash2(api, oldProofHashL, oldProofHashR)
