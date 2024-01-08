@@ -2,7 +2,7 @@ package smt
 
 import "github.com/consensys/gnark/frontend"
 
-func SMTLevIns(api frontend.API, enabled frontend.Variable, siblings []frontend.Variable) (levIns []frontend.Variable) {
+func LevIns(api frontend.API, enabled frontend.Variable, siblings []frontend.Variable) (levIns []frontend.Variable) {
 	levels := len(siblings)
 	levIns = make([]frontend.Variable, levels)
 	done := make([]frontend.Variable, levels-1)
