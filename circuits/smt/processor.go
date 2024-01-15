@@ -13,8 +13,8 @@ func Processor(api frontend.API, oldRoot frontend.Variable, siblings []frontend.
 	enabled := api.Sub(api.Add(fnc0, fnc1), api.Mul(fnc0, fnc1))
 	hash1Old := Hash1(api, oldKey, oldValue)
 	hash1New := Hash1(api, newKey, newValue)
-	n2bOld := circuits.Num2BitsStrict(api, oldKey, 254)
-	n2bNew := circuits.Num2BitsStrict(api, newKey, 254)
+	n2bOld := api.ToBinary(oldKey, api.Compiler().FieldBitLen())
+	n2bNew := api.ToBinary(newKey, api.Compiler().FieldBitLen())
 	smtLevIns := LevIns(api, enabled, siblings)
 
 	xors := make([]frontend.Variable, levels)
