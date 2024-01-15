@@ -3,7 +3,7 @@ package smt
 import (
 	"github.com/consensys/gnark/frontend"
 
-	"github.com/liyue201/gnark-circomlib/circuits"
+	"github.com/mdehoog/gnark-circom-smt/circuits"
 )
 
 // based on https://github.com/iden3/circomlib/blob/master/circuits/smt/smthash_poseidon.circom

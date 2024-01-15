@@ -3,7 +3,7 @@ package smt
 import (
 	"github.com/consensys/gnark/frontend"
 
-	"github.com/liyue201/gnark-circomlib/circuits"
+	"github.com/mdehoog/gnark-circom-smt/circuits"
 )
 
 // based on https://github.com/iden3/circomlib/blob/cff5ab6288b55ef23602221694a6a38a0239dcc0/circuits/smt/smtprocessorlevel.circom
