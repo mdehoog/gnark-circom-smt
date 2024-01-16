@@ -11,6 +11,7 @@ type Wrapper interface {
 	Add(key, value *big.Int) (Assignment, error)
 	Update(key, value *big.Int) (Assignment, error)
 	Set(key, value *big.Int) (Assignment, error)
+	Proof(key, value *big.Int) (Assignment, error)
 }
 
 type Assignment struct {

@@ -39,6 +39,56 @@ func (t *WrapperArbo) Set(key, value *big.Int) (Assignment, error) {
 	})
 }
 
+func (t *WrapperArbo) Proof(key, value *big.Int) (Assignment, error) {
+	assignment := Assignment{
+		NewKey:   key,
+		NewValue: value,
+	}
+
+	rootBytes, err := t.Root()
+	if err != nil {
+		return assignment, err
+	}
+	assignment.OldRoot = arbo.BytesToBigInt(rootBytes)
+	assignment.NewRoot = arbo.BytesToBigInt(rootBytes)
+
+	bLen := t.HashFunction().Len()
+	keyBytes := arbo.BigIntToBytes(bLen, key)
+	oldKeyBytes, oldValueBytes, siblingsPacked, exists, err := t.GenProof(keyBytes)
+	if err != nil {
+		return assignment, err
+	}
+
+	if exists {
+		assignment.Fnc0 = 0
+	} else {
+		assignment.Fnc0 = 1
+	}
+	assignment.OldKey = arbo.BytesToBigInt(oldKeyBytes)
+	assignment.OldValue = arbo.BytesToBigInt(oldValueBytes)
+	if len(oldKeyBytes) > 0 {
+		assignment.IsOld0 = 0
+	} else {
+		assignment.IsOld0 = 1
+	}
+
+	siblingsUnpacked, err := arbo.UnpackSiblings(t.HashFunction(), siblingsPacked)
+	if err != nil {
+		return assignment, err
+	}
+
+	assignment.Siblings = make([]*big.Int, t.levels)
+	for i := 0; i < len(assignment.Siblings); i++ {
+		if i < len(siblingsUnpacked) {
+			assignment.Siblings[i] = arbo.BytesToBigInt(siblingsUnpacked[i])
+		} else {
+			assignment.Siblings[i] = big.NewInt(0)
+		}
+	}
+
+	return assignment, nil
+}
+
 func (t *WrapperArbo) add(k, v []byte, _ bool, assignment *Assignment) error {
 	assignment.Fnc0 = 1
 	assignment.Fnc1 = 0
