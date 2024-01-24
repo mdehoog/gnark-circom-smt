@@ -21,6 +21,18 @@ func NewWrapperArbo(tree *arbo.Tree, levels uint8) Wrapper {
 	}
 }
 
+func (t *WrapperArbo) Get(key *big.Int) (*big.Int, error) {
+	bLen := t.HashFunction().Len()
+	keyBytes := arbo.BigIntToBytes(bLen, key)
+	_, v, err := t.Tree.Get(keyBytes)
+	if errors.Is(err, arbo.ErrKeyNotFound) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return arbo.BytesToBigInt(v), nil
+}
+
 func (t *WrapperArbo) Add(key, value *big.Int) (Assignment, error) {
 	return t.addOrUpdate(key, value, t.add)
 }
@@ -117,7 +129,7 @@ func (t *WrapperArbo) addOrUpdate(key, value *big.Int, action func(k, v []byte, 
 	keyBytes := arbo.BigIntToBytes(bLen, key)
 	valueBytes := arbo.BigIntToBytes(bLen, value)
 
-	oldKeyBytes, oldValueBytes, err := t.Get(keyBytes)
+	oldKeyBytes, oldValueBytes, err := t.Tree.Get(keyBytes)
 	if err != nil && !errors.Is(err, arbo.ErrKeyNotFound) {
 		return assignment, err
 	}
