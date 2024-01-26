@@ -8,11 +8,9 @@ import (
 // generating circuit assignments for generating proof witnesses. See WrapperArbo
 // for a concrete example that wrappers the arbo.Tree implementation.
 type Wrapper interface {
-	Get(key *big.Int) (*big.Int, error)
-	Add(key, value *big.Int) (Assignment, error)
-	Update(key, value *big.Int) (Assignment, error)
+	Proof(key *big.Int) (Assignment, error)
+	SetProof(key, value *big.Int) (Assignment, error)
 	Set(key, value *big.Int) (Assignment, error)
-	Proof(key, value *big.Int) (Assignment, error)
 }
 
 type Assignment struct {

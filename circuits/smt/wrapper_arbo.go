@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/big"
 
+	"go.vocdoni.io/dvote/db"
 	"go.vocdoni.io/dvote/tree/arbo"
 )
 
@@ -11,50 +12,21 @@ import (
 // tree operations like Add and Update.
 type WrapperArbo struct {
 	*arbo.Tree
-	levels uint8
+	database db.Database
+	levels   uint8
 }
 
-func NewWrapperArbo(tree *arbo.Tree, levels uint8) Wrapper {
+func NewWrapperArbo(tree *arbo.Tree, database db.Database, levels uint8) Wrapper {
 	return &WrapperArbo{
-		Tree:   tree,
-		levels: levels,
+		Tree:     tree,
+		database: database,
+		levels:   levels,
 	}
 }
 
-func (t *WrapperArbo) Get(key *big.Int) (*big.Int, error) {
-	bLen := t.HashFunction().Len()
-	keyBytes := arbo.BigIntToBytes(bLen, key)
-	_, v, err := t.Tree.Get(keyBytes)
-	if errors.Is(err, arbo.ErrKeyNotFound) {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
-	}
-	return arbo.BytesToBigInt(v), nil
-}
-
-func (t *WrapperArbo) Add(key, value *big.Int) (Assignment, error) {
-	return t.addOrUpdate(key, value, t.add)
-}
-
-func (t *WrapperArbo) Update(key, value *big.Int) (Assignment, error) {
-	return t.addOrUpdate(key, value, t.update)
-}
-
-func (t *WrapperArbo) Set(key, value *big.Int) (Assignment, error) {
-	return t.addOrUpdate(key, value, func(k, v []byte, exists bool, assignment *Assignment) error {
-		if exists {
-			return t.update(k, v, exists, assignment)
-		} else {
-			return t.add(k, v, exists, assignment)
-		}
-	})
-}
-
-func (t *WrapperArbo) Proof(key, value *big.Int) (Assignment, error) {
+func (t *WrapperArbo) Proof(key *big.Int) (Assignment, error) {
 	assignment := Assignment{
-		NewKey:   key,
-		NewValue: value,
+		NewKey: key,
 	}
 
 	rootBytes, err := t.Root()
@@ -73,6 +45,7 @@ func (t *WrapperArbo) Proof(key, value *big.Int) (Assignment, error) {
 
 	if exists {
 		assignment.Fnc0 = 0
+		assignment.NewValue = arbo.BytesToBigInt(oldValueBytes)
 	} else {
 		assignment.Fnc0 = 1
 	}
@@ -101,25 +74,53 @@ func (t *WrapperArbo) Proof(key, value *big.Int) (Assignment, error) {
 	return assignment, nil
 }
 
-func (t *WrapperArbo) add(k, v []byte, _ bool, assignment *Assignment) error {
+func (t *WrapperArbo) SetProof(key, value *big.Int) (Assignment, error) {
+	tx := t.database.WriteTx()
+	defer tx.Discard()
+	return t.addOrUpdate(tx, key, value, func(k, v []byte, exists bool, assignment *Assignment) error {
+		if exists {
+			return t.update(tx, k, v, exists, assignment)
+		} else {
+			return t.add(tx, k, v, exists, assignment)
+		}
+	})
+}
+
+func (t *WrapperArbo) Set(key, value *big.Int) (Assignment, error) {
+	tx := t.database.WriteTx()
+	defer tx.Discard()
+	assignment, err := t.addOrUpdate(tx, key, value, func(k, v []byte, exists bool, assignment *Assignment) error {
+		if exists {
+			return t.update(tx, k, v, exists, assignment)
+		} else {
+			return t.add(tx, k, v, exists, assignment)
+		}
+	})
+	if err == nil {
+		err = tx.Commit()
+	}
+	return assignment, err
+}
+
+func (t *WrapperArbo) add(tx db.WriteTx, k, v []byte, _ bool, assignment *Assignment) error {
 	assignment.Fnc0 = 1
 	assignment.Fnc1 = 0
-	return t.Tree.Add(k, v)
+	return t.Tree.AddWithTx(tx, k, v)
 }
 
-func (t *WrapperArbo) update(k, v []byte, _ bool, assignment *Assignment) error {
+func (t *WrapperArbo) update(tx db.WriteTx, k, v []byte, _ bool, assignment *Assignment) error {
 	assignment.Fnc0 = 0
 	assignment.Fnc1 = 1
-	return t.Tree.Update(k, v)
+	return t.Tree.UpdateWithTx(tx, k, v)
 }
 
-func (t *WrapperArbo) addOrUpdate(key, value *big.Int, action func(k, v []byte, exists bool, assignment *Assignment) error) (Assignment, error) {
+func (t *WrapperArbo) addOrUpdate(tx db.WriteTx, key, value *big.Int, action func(k, v []byte, exists bool, assignment *Assignment) error) (Assignment, error) {
 	assignment := Assignment{
 		NewKey:   key,
 		NewValue: value,
 	}
 
-	oldRootBytes, err := t.Root()
+	oldRootBytes, err := t.RootWithTx(tx)
 	if err != nil {
 		return assignment, err
 	}
@@ -129,7 +130,7 @@ func (t *WrapperArbo) addOrUpdate(key, value *big.Int, action func(k, v []byte, 
 	keyBytes := arbo.BigIntToBytes(bLen, key)
 	valueBytes := arbo.BigIntToBytes(bLen, value)
 
-	oldKeyBytes, oldValueBytes, err := t.Tree.Get(keyBytes)
+	oldKeyBytes, oldValueBytes, err := t.Tree.GetWithTx(tx, keyBytes)
 	if err != nil && !errors.Is(err, arbo.ErrKeyNotFound) {
 		return assignment, err
 	}
@@ -146,13 +147,13 @@ func (t *WrapperArbo) addOrUpdate(key, value *big.Int, action func(k, v []byte, 
 		assignment.IsOld0 = 1
 	}
 
-	newRootBytes, err := t.Root()
+	newRootBytes, err := t.RootWithTx(tx)
 	if err != nil {
 		return assignment, err
 	}
 	assignment.NewRoot = arbo.BytesToBigInt(newRootBytes)
 
-	_, _, siblingsPacked, exists, err := t.GenProof(keyBytes)
+	_, _, siblingsPacked, exists, err := t.GenProofWithTx(tx, keyBytes)
 	if !exists {
 		return assignment, errors.New("key not found")
 	}
