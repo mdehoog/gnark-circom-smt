@@ -25,11 +25,15 @@ func NewWrapperArbo(tree *arbo.Tree, database db.Database, levels uint8) Wrapper
 }
 
 func (t *WrapperArbo) Proof(key *big.Int) (Assignment, error) {
+	return t.ProofWithTx(t.database, key)
+}
+
+func (t *WrapperArbo) ProofWithTx(tx db.Reader, key *big.Int) (Assignment, error) {
 	assignment := Assignment{
 		NewKey: key,
 	}
 
-	rootBytes, err := t.Root()
+	rootBytes, err := t.RootWithTx(tx)
 	if err != nil {
 		return assignment, err
 	}
@@ -38,7 +42,7 @@ func (t *WrapperArbo) Proof(key *big.Int) (Assignment, error) {
 
 	bLen := t.HashFunction().Len()
 	keyBytes := arbo.BigIntToBytes(bLen, key)
-	oldKeyBytes, oldValueBytes, siblingsPacked, exists, err := t.GenProof(keyBytes)
+	oldKeyBytes, oldValueBytes, siblingsPacked, exists, err := t.GenProofWithTx(tx, keyBytes)
 	if err != nil {
 		return assignment, err
 	}
