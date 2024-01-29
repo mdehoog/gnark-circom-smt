@@ -77,6 +77,20 @@ func (t *WrapperArbo) Proof(key *big.Int) (Assignment, error) {
 func (t *WrapperArbo) SetProof(key, value *big.Int) (Assignment, error) {
 	tx := t.database.WriteTx()
 	defer tx.Discard()
+	return t.SetWithTx(tx, key, value)
+}
+
+func (t *WrapperArbo) Set(key, value *big.Int) (Assignment, error) {
+	tx := t.database.WriteTx()
+	defer tx.Discard()
+	assignment, err := t.SetWithTx(tx, key, value)
+	if err == nil {
+		err = tx.Commit()
+	}
+	return assignment, err
+}
+
+func (t *WrapperArbo) SetWithTx(tx db.WriteTx, key, value *big.Int) (Assignment, error) {
 	return t.addOrUpdate(tx, key, value, func(k, v []byte, exists bool, assignment *Assignment) error {
 		if exists {
 			return t.update(tx, k, v, exists, assignment)
@@ -84,22 +98,6 @@ func (t *WrapperArbo) SetProof(key, value *big.Int) (Assignment, error) {
 			return t.add(tx, k, v, exists, assignment)
 		}
 	})
-}
-
-func (t *WrapperArbo) Set(key, value *big.Int) (Assignment, error) {
-	tx := t.database.WriteTx()
-	defer tx.Discard()
-	assignment, err := t.addOrUpdate(tx, key, value, func(k, v []byte, exists bool, assignment *Assignment) error {
-		if exists {
-			return t.update(tx, k, v, exists, assignment)
-		} else {
-			return t.add(tx, k, v, exists, assignment)
-		}
-	})
-	if err == nil {
-		err = tx.Commit()
-	}
-	return assignment, err
 }
 
 func (t *WrapperArbo) add(tx db.WriteTx, k, v []byte, _ bool, assignment *Assignment) error {

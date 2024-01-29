@@ -2,6 +2,8 @@ package smt
 
 import (
 	"math/big"
+
+	"go.vocdoni.io/dvote/db"
 )
 
 // Wrapper defines methods for wrapping existing SMT implementations, useful for
@@ -11,6 +13,7 @@ type Wrapper interface {
 	Proof(key *big.Int) (Assignment, error)
 	SetProof(key, value *big.Int) (Assignment, error)
 	Set(key, value *big.Int) (Assignment, error)
+	SetWithTx(tx db.WriteTx, key, value *big.Int) (Assignment, error)
 }
 
 type Assignment struct {
