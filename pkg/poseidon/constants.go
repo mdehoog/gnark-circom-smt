@@ -12,31 +12,31 @@ type constantsStr struct {
 	P [][][]string
 }
 
-func c[E Element[E]](factory func() E, i int) []E {
+func c[E Element[E]](i int) []E {
 	cci := make([]E, len(cs.C[i]))
 	for j := 0; j < len(cs.C[i]); j++ {
 		b, ok := new(big.Int).SetString(cs.C[i][j], 16)
 		if !ok {
 			panic(fmt.Errorf("error parsing constants"))
 		}
-		cci[j] = factory().SetBigInt(b)
+		cci[j] = newElement[E]().SetBigInt(b)
 	}
 	return cci
 }
 
-func s[E Element[E]](factory func() E, i int) []E {
+func s[E Element[E]](i int) []E {
 	csi := make([]E, len(cs.S[i]))
 	for j := 0; j < len(cs.S[i]); j++ {
 		b, ok := new(big.Int).SetString(cs.S[i][j], 16)
 		if !ok {
 			panic(fmt.Errorf("error parsing constants"))
 		}
-		csi[j] = factory().SetBigInt(b)
+		csi[j] = newElement[E]().SetBigInt(b)
 	}
 	return csi
 }
 
-func m[E Element[E]](factory func() E, i int) [][]E {
+func m[E Element[E]](i int) [][]E {
 	cmi := make([][]E, len(cs.M[i]))
 	for j := 0; j < len(cs.M[i]); j++ {
 		cmij := make([]E, len(cs.M[i][j]))
@@ -45,14 +45,14 @@ func m[E Element[E]](factory func() E, i int) [][]E {
 			if !ok {
 				panic(fmt.Errorf("error parsing constants"))
 			}
-			cmij[k] = factory().SetBigInt(b)
+			cmij[k] = newElement[E]().SetBigInt(b)
 		}
 		cmi[j] = cmij
 	}
 	return cmi
 }
 
-func p[E Element[E]](factory func() E, i int) [][]E {
+func p[E Element[E]](i int) [][]E {
 	cpi := make([][]E, len(cs.P[i]))
 	for j := 0; j < len(cs.P[i]); j++ {
 		cpij := make([]E, len(cs.P[i][j]))
@@ -61,7 +61,7 @@ func p[E Element[E]](factory func() E, i int) [][]E {
 			if !ok {
 				panic(fmt.Errorf("error parsing constants"))
 			}
-			cpij[k] = factory().SetBigInt(b)
+			cpij[k] = newElement[E]().SetBigInt(b)
 		}
 		cpi[j] = cpij
 	}

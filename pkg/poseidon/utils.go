@@ -2,22 +2,23 @@ package poseidon
 
 import (
 	"math/big"
+	"reflect"
 
 	"github.com/consensys/gnark-crypto/field/pool"
 )
 
 // CheckBigIntInField checks if given *big.Int fits in a Field Q element
-func CheckBigIntInField[E Element[E]](factory func() E, a *big.Int) bool {
-	m := factory()
-	modulus := m.Sub(m, factory().SetOne()).BigInt(big.NewInt(0))
+func CheckBigIntInField[E Element[E]](a *big.Int) bool {
+	m := newElement[E]()
+	modulus := m.Sub(m, newElement[E]().SetOne()).BigInt(big.NewInt(0))
 	modulus.Add(modulus, big.NewInt(1))
 	return a.Cmp(modulus) == -1
 }
 
 // CheckBigIntArrayInField checks if given *big.Int fits in a Field Q element
-func CheckBigIntArrayInField[E Element[E]](factory func() E, arr []*big.Int) bool {
+func CheckBigIntArrayInField[E Element[E]](arr []*big.Int) bool {
 	for _, a := range arr {
-		if !CheckBigIntInField(factory, a) {
+		if !CheckBigIntInField[E](a) {
 			return false
 		}
 	}
@@ -25,10 +26,10 @@ func CheckBigIntArrayInField[E Element[E]](factory func() E, arr []*big.Int) boo
 }
 
 // BigIntArrayToElementArray converts an array of *big.Int into an array of *ff.Element
-func BigIntArrayToElementArray[E Element[E]](factory func() E, bi []*big.Int) []E {
+func BigIntArrayToElementArray[E Element[E]](bi []*big.Int) []E {
 	o := make([]E, len(bi))
 	for i := range bi {
-		o[i] = factory().SetBigInt(bi[i])
+		o[i] = newElement[E]().SetBigInt(bi[i])
 	}
 	return o
 }
@@ -60,4 +61,10 @@ func Exp[E Element[E]](z, x E, k *big.Int) {
 			z.Mul(z, x)
 		}
 	}
+}
+
+func newElement[E Element[E]]() E {
+	typ := reflect.TypeOf((*E)(nil)).Elem()
+	val := reflect.New(typ.Elem())
+	return val.Interface().(E)
 }

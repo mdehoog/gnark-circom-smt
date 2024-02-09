@@ -36,23 +36,23 @@ var NROUNDSP = []int{56, 57, 56, 60, 60, 63, 64, 63, 60, 66, 60, 65, 70, 60, 64,
 const spongeChunkSize = 31
 const spongeInputs = 16
 
-func zero[E Element[E]](factory func() E) E {
-	return factory().SetUint64(0)
+func zero[E Element[E]]() E {
+	return newElement[E]().SetUint64(0)
 }
 
 var big5 = big.NewInt(5)
 
 // exp5 performs x^5 mod p
 // https://eprint.iacr.org/2019/458.pdf page 8
-func exp5[E Element[E]](factory func() E, a E) {
-	b := factory().Set(a)
+func exp5[E Element[E]](a E) {
+	b := newElement[E]().Set(a)
 	Exp[E](a, b, big5)
 }
 
 // exp5state perform exp5 for whole state
-func exp5state[E Element[E]](factory func() E, state []E) {
+func exp5state[E Element[E]](state []E) {
 	for i := 0; i < len(state); i++ {
-		exp5(factory, state[i])
+		exp5(state[i])
 	}
 }
 
@@ -64,11 +64,11 @@ func ark[E Element[E]](state, c []E, it int) {
 }
 
 // mix returns [[matrix]] * [vector]
-func mix[E Element[E]](factory func() E, state []E, t int, m [][]E) []E {
-	mul := zero[E](factory)
+func mix[E Element[E]](state []E, t int, m [][]E) []E {
+	mul := zero[E]()
 	newState := make([]E, t)
 	for i := 0; i < t; i++ {
-		newState[i] = zero[E](factory)
+		newState[i] = zero[E]()
 	}
 	for i := 0; i < len(state); i++ {
 		newState[i].SetUint64(0)
@@ -80,66 +80,66 @@ func mix[E Element[E]](factory func() E, state []E, t int, m [][]E) []E {
 	return newState
 }
 
-func HashMulti[E Element[E]](factory func() E, inpBI []*big.Int) (*big.Int, error) {
+func HashMulti[E Element[E]](inpBI []*big.Int) (*big.Int, error) {
 	groups := (len(inpBI) + 15) / 16
 	state := big.NewInt(0)
 	var err error
 	for i := 0; i < groups-1; i++ {
-		state, err = HashEx[E](factory, inpBI[i*16:(i+1)*16], state)
+		state, err = HashEx[E](inpBI[i*16:(i+1)*16], state)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return HashEx[E](factory, inpBI[(groups-1)*16:], state)
+	return HashEx[E](inpBI[(groups-1)*16:], state)
 }
 
 // Hash computes the Poseidon hash for the given inputs
-func Hash[E Element[E]](factory func() E, inpBI []*big.Int) (*big.Int, error) {
-	return HashEx[E](factory, inpBI, big.NewInt(0))
+func Hash[E Element[E]](inpBI []*big.Int) (*big.Int, error) {
+	return HashEx[E](inpBI, big.NewInt(0))
 }
 
-func HashEx[E Element[E]](factory func() E, inpBI []*big.Int, initialState *big.Int) (*big.Int, error) {
+func HashEx[E Element[E]](inpBI []*big.Int, initialState *big.Int) (*big.Int, error) {
 	t := len(inpBI) + 1
 	if len(inpBI) == 0 || len(inpBI) > len(NROUNDSP) {
 		return nil, fmt.Errorf("invalid inputs length %d, max %d", len(inpBI), len(NROUNDSP))
 	}
-	if !CheckBigIntArrayInField(factory, inpBI) {
+	if !CheckBigIntArrayInField[E](inpBI) {
 		return nil, errors.New("inputs values not inside Finite Field")
 	}
-	if !CheckBigIntInField(factory, initialState) {
+	if !CheckBigIntInField[E](initialState) {
 		return nil, errors.New("inputs values not inside Finite Field")
 	}
-	inp := BigIntArrayToElementArray[E](factory, inpBI)
+	inp := BigIntArrayToElementArray[E](inpBI)
 
 	nRoundsF := NROUNDSF
 	nRoundsP := NROUNDSP[t-2]
-	C := c[E](factory, t-2)
-	S := s[E](factory, t-2)
-	M := m[E](factory, t-2)
-	P := p[E](factory, t-2)
+	C := c[E](t - 2)
+	S := s[E](t - 2)
+	M := m[E](t - 2)
+	P := p[E](t - 2)
 
 	state := make([]E, t)
-	state[0] = factory().SetBigInt(initialState)
+	state[0] = newElement[E]().SetBigInt(initialState)
 	copy(state[1:], inp)
 
 	ark(state, C, 0)
 
 	for i := 0; i < nRoundsF/2-1; i++ {
-		exp5state(factory, state)
+		exp5state(state)
 		ark(state, C, (i+1)*t)
-		state = mix(factory, state, t, M)
+		state = mix(state, t, M)
 	}
-	exp5state(factory, state)
+	exp5state(state)
 	ark(state, C, (nRoundsF/2)*t)
-	state = mix(factory, state, t, P)
+	state = mix(state, t, P)
 
-	mul := zero[E](factory)
+	mul := zero[E]()
 	for i := 0; i < nRoundsP; i++ {
-		exp5(factory, state[0])
+		exp5(state[0])
 		state[0].Add(state[0], C[(nRoundsF/2+1)*t+i])
 
 		mul.SetZero()
-		newState0 := zero[E](factory)
+		newState0 := zero[E]()
 		for j := 0; j < len(state); j++ {
 			mul.Mul(S[(t*2-1)*i+j], state[j])
 			newState0.Add(newState0, mul)
@@ -153,12 +153,12 @@ func HashEx[E Element[E]](factory func() E, inpBI []*big.Int, initialState *big.
 	}
 
 	for i := 0; i < nRoundsF/2-1; i++ {
-		exp5state(factory, state)
+		exp5state(state)
 		ark(state, C, (nRoundsF/2+1)*t+nRoundsP+i*t)
-		state = mix(factory, state, t, M)
+		state = mix(state, t, M)
 	}
-	exp5state(factory, state)
-	state = mix(factory, state, t, M)
+	exp5state(state)
+	state = mix(state, t, M)
 
 	rE := state[0]
 	r := big.NewInt(0)
@@ -167,12 +167,12 @@ func HashEx[E Element[E]](factory func() E, inpBI []*big.Int, initialState *big.
 }
 
 // HashBytes returns a sponge hash of a msg byte slice split into blocks of 31 bytes
-func HashBytes[E Element[E]](factory func() E, msg []byte) (*big.Int, error) {
-	return HashBytesX[E](factory, msg, spongeInputs)
+func HashBytes[E Element[E]](msg []byte) (*big.Int, error) {
+	return HashBytesX[E](msg, spongeInputs)
 }
 
 // HashBytesX returns a sponge hash of a msg byte slice split into blocks of 31 bytes
-func HashBytesX[E Element[E]](factory func() E, msg []byte, frameSize int) (*big.Int, error) {
+func HashBytesX[E Element[E]](msg []byte, frameSize int) (*big.Int, error) {
 	if frameSize < 2 || frameSize > 16 {
 		return nil, errors.New("incorrect frame size")
 	}
@@ -191,7 +191,7 @@ func HashBytesX[E Element[E]](factory func() E, msg []byte, frameSize int) (*big
 		dirty = true
 		inputs[k].SetBytes(msg[spongeChunkSize*i : spongeChunkSize*(i+1)])
 		if k == frameSize-1 {
-			hash, err = Hash[E](factory, inputs)
+			hash, err = Hash[E](inputs)
 			dirty = false
 			if err != nil {
 				return nil, err
@@ -219,7 +219,7 @@ func HashBytesX[E Element[E]](factory func() E, msg []byte, frameSize int) (*big
 
 	if dirty {
 		// we haven't hashed something in the main sponge loop and need to do hash here
-		hash, err = Hash[E](factory, inputs)
+		hash, err = Hash[E](inputs)
 		if err != nil {
 			return nil, err
 		}
@@ -229,12 +229,12 @@ func HashBytesX[E Element[E]](factory func() E, msg []byte, frameSize int) (*big
 }
 
 // SpongeHash returns a sponge hash of inputs (using Poseidon with frame size of 16 inputs)
-func SpongeHash[E Element[E]](factory func() E, inputs []*big.Int) (*big.Int, error) {
-	return SpongeHashX[E](factory, inputs, spongeInputs)
+func SpongeHash[E Element[E]](inputs []*big.Int) (*big.Int, error) {
+	return SpongeHashX[E](inputs, spongeInputs)
 }
 
 // SpongeHashX returns a sponge hash of inputs using Poseidon with configurable frame size
-func SpongeHashX[E Element[E]](factory func() E, inputs []*big.Int, frameSize int) (*big.Int, error) {
+func SpongeHashX[E Element[E]](inputs []*big.Int, frameSize int) (*big.Int, error) {
 	if frameSize < 2 || frameSize > 16 {
 		return nil, errors.New("incorrect frame size")
 	}
@@ -253,7 +253,7 @@ func SpongeHashX[E Element[E]](factory func() E, inputs []*big.Int, frameSize in
 		dirty = true
 		frame[k] = inputs[i]
 		if k == frameSize-1 {
-			hash, err = Hash[E](factory, frame)
+			hash, err = Hash[E](frame)
 			dirty = false
 			if err != nil {
 				return nil, err
@@ -271,7 +271,7 @@ func SpongeHashX[E Element[E]](factory func() E, inputs []*big.Int, frameSize in
 
 	if dirty {
 		// we haven't hashed something in the main sponge loop and need to do hash here
-		hash, err = Hash[E](factory, frame)
+		hash, err = Hash[E](frame)
 		if err != nil {
 			return nil, err
 		}
