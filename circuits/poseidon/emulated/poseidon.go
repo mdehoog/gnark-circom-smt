@@ -26,7 +26,8 @@ func Mix[T emulated.FieldParams](field *emulated.Field[T], in []*emulated.Elemen
 	t := len(in)
 	out := make([]*emulated.Element[T], t)
 	for i := 0; i < t; i++ {
-		lc := field.NewElement(0)
+		zero := emulated.ValueOf[T](0)
+		lc := &zero
 		for j := 0; j < t; j++ {
 			lc = field.Add(lc, field.Mul(m[j][i], in[j]))
 		}
@@ -37,7 +38,8 @@ func Mix[T emulated.FieldParams](field *emulated.Field[T], in []*emulated.Elemen
 
 func MixLast[T emulated.FieldParams](field *emulated.Field[T], in []*emulated.Element[T], m [][]*emulated.Element[T], s int) *emulated.Element[T] {
 	t := len(in)
-	out := field.NewElement(0)
+	zero := emulated.ValueOf[T](0)
+	out := &zero
 	for j := 0; j < t; j++ {
 		out = field.Add(out, field.Mul(m[j][s], in[j]))
 	}
@@ -106,7 +108,8 @@ func HashEx[T emulated.FieldParams](field *emulated.Field[T], inputs []*emulated
 		state[0] = Sigma(field, state[0])
 
 		state[0] = field.Add(state[0], c[(nRoundsF/2+1)*t+r])
-		newState0 := field.NewElement(0)
+		zero := emulated.ValueOf[T](0)
+		newState0 := &zero
 		for j := 0; j < len(state); j++ {
 			mul := field.Mul(s[(t*2-1)*r+j], state[j])
 			newState0 = field.Add(newState0, mul)
@@ -137,13 +140,15 @@ func HashEx[T emulated.FieldParams](field *emulated.Field[T], inputs []*emulated
 }
 
 func Hash[T emulated.FieldParams](field *emulated.Field[T], inputs []*emulated.Element[T]) *emulated.Element[T] {
-	out := HashEx(field, inputs, field.NewElement(0), 1)
+	zero := emulated.ValueOf[T](0)
+	out := HashEx(field, inputs, &zero, 1)
 	return out[0]
 }
 
 func HashMulti[T emulated.FieldParams](field *emulated.Field[T], inputs []*emulated.Element[T]) *emulated.Element[T] {
 	groups := (len(inputs) + 15) / 16
-	state := []*emulated.Element[T]{field.NewElement(0)}
+	zero := emulated.ValueOf[T](0)
+	state := []*emulated.Element[T]{&zero}
 	for i := 0; i < groups-1; i++ {
 		state = HashEx(field, inputs[i*16:(i+1)*16], state[0], 1)
 	}
