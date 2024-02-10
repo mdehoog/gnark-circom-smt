@@ -1,4 +1,4 @@
-package circuits
+package poseidon
 
 import (
 	"math/big"
@@ -42,7 +42,7 @@ func MixLast(api frontend.API, in []frontend.Variable, m [][]*big.Int, s int) fr
 	return out
 }
 
-func PoseidonEx(api frontend.API, inputs []frontend.Variable, initialState frontend.Variable, nOuts int) []frontend.Variable {
+func HashEx(api frontend.API, inputs []frontend.Variable, initialState frontend.Variable, nOuts int) []frontend.Variable {
 	nInputs := len(inputs)
 	out := make([]frontend.Variable, nOuts)
 
@@ -117,7 +117,17 @@ func PoseidonEx(api frontend.API, inputs []frontend.Variable, initialState front
 	return out
 }
 
-func Poseidon(api frontend.API, inputs []frontend.Variable) frontend.Variable {
-	out := PoseidonEx(api, inputs, 0, 1)
+func Hash(api frontend.API, inputs []frontend.Variable) frontend.Variable {
+	out := HashEx(api, inputs, 0, 1)
 	return out[0]
+}
+
+func HashMulti(api frontend.API, inputs []frontend.Variable) frontend.Variable {
+	groups := (len(inputs) + 15) / 16
+	state := []frontend.Variable{0}
+	for i := 0; i < groups-1; i++ {
+		state = HashEx(api, inputs[i*16:(i+1)*16], state[0], 1)
+	}
+	state = HashEx(api, inputs[(groups-1)*16:], state[0], 1)
+	return state[0]
 }

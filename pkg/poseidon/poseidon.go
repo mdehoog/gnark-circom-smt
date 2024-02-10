@@ -25,6 +25,7 @@ type Element[E any] interface {
 	Mul(E, E) E
 	Add(E, E) E
 	Sub(E, E) E
+	Marshal() []byte
 }
 
 // NROUNDSF constant from Poseidon paper

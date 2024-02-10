@@ -10,7 +10,7 @@ func LevIns(api frontend.API, enabled frontend.Variable, siblings []frontend.Var
 	done := make([]frontend.Variable, levels-1)
 
 	isZero := make([]frontend.Variable, levels)
-	for i := 0; i < len(siblings); i++ {
+	for i := 0; i < levels; i++ {
 		isZero[i] = api.IsZero(siblings[i])
 	}
 	api.AssertIsEqual(api.Mul(api.Sub(isZero[levels-1], 1), enabled), 0)

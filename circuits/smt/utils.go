@@ -1,10 +1,10 @@
-package circuits
+package smt
 
 import (
 	"github.com/consensys/gnark/frontend"
 )
 
-func IsEqual(api frontend.API, a frontend.Variable, b frontend.Variable) frontend.Variable {
+func IsEqual(api frontend.API, a, b frontend.Variable) frontend.Variable {
 	return api.IsZero(api.Sub(a, b))
 }
 

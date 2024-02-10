@@ -1,4 +1,4 @@
-package circuits
+package poseidon
 
 import (
 	"fmt"

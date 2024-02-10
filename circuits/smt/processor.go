@@ -2,8 +2,6 @@ package smt
 
 import (
 	"github.com/consensys/gnark/frontend"
-
-	"github.com/mdehoog/gnark-circom-smt/circuits"
 )
 
 // based on https://github.com/iden3/circomlib/blob/cff5ab6288b55ef23602221694a6a38a0239dcc0/circuits/smt/smtprocessor.circom
@@ -40,7 +38,7 @@ func Processor(api frontend.API, oldRoot frontend.Variable, siblings []frontend.
 
 	levelsOldRoot := make([]frontend.Variable, levels)
 	levelsNewRoot := make([]frontend.Variable, levels)
-	for i := levels - 1; i != -1; i-- {
+	for i := levels - 1; i >= 0; i-- {
 		if i == levels-1 {
 			levelsOldRoot[i], levelsNewRoot[i] = ProcessorLevel(api, stTop[i], stOld0[i], stBot[i], stNew1[i], stUpd[i], siblings[i], hash1Old, hash1New, n2bNew[i], 0, 0)
 		} else {
@@ -48,18 +46,18 @@ func Processor(api frontend.API, oldRoot frontend.Variable, siblings []frontend.
 		}
 	}
 
-	topSwitcherL, topSwitcherR := circuits.Switcher(api, api.Mul(fnc0, fnc1), levelsOldRoot[0], levelsNewRoot[0])
-	circuits.ForceEqualIfEnabled(api, oldRoot, topSwitcherL, enabled)
+	topSwitcherL, topSwitcherR := Switcher(api, api.Mul(fnc0, fnc1), levelsOldRoot[0], levelsNewRoot[0])
+	ForceEqualIfEnabled(api, oldRoot, topSwitcherL, enabled)
 
 	newRoot = api.Add(api.Mul(enabled, api.Sub(topSwitcherR, oldRoot)), oldRoot)
 
-	areKeyEquals := circuits.IsEqual(api, oldKey, newKey)
+	areKeyEquals := IsEqual(api, oldKey, newKey)
 	in := []frontend.Variable{
 		api.Sub(1, fnc0),
 		fnc1,
 		api.Sub(1, areKeyEquals),
 	}
-	keysOk := circuits.MultiAnd(api, in)
+	keysOk := MultiAnd(api, in)
 	api.AssertIsEqual(keysOk, 0)
 	return
 }

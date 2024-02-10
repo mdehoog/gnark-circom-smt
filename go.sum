@@ -21,10 +21,10 @@ github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 h1:zuQyyAK
 github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06/go.mod h1:7nc4anLGjupUW/PeY5qiNYsdNXj7zopG+eqsS7To5IQ=
 github.com/consensys/bavard v0.1.13 h1:oLhMLOFGTLdlda/kma4VOJazblc7IM5y5QPd2A/YjhQ=
 github.com/consensys/bavard v0.1.13/go.mod h1:9ItSMtA/dXMAiL7BG6bqW2m3NdSEObYWoH223nGHukI=
-github.com/consensys/gnark v0.9.1 h1:aTwBp5469MY/2jNrf4ABrqHRW3+JytfkADdw4ZBY7T0=
-github.com/consensys/gnark v0.9.1/go.mod h1:udWvWGXnfBE7mn7BsNoGAvZDnUhcONBEtNijvVjfY80=
-github.com/consensys/gnark-crypto v0.12.2-0.20231013160410-1f65e75b6dfb h1:f0BMgIjhZy4lSRHCXFbQst85f5agZAjtDMixQqBWNpc=
-github.com/consensys/gnark-crypto v0.12.2-0.20231013160410-1f65e75b6dfb/go.mod h1:v2Gy7L/4ZRosZ7Ivs+9SfUDr0f5UlG+EM5t7MPHiLuY=
+github.com/consensys/gnark v0.9.2-0.20240209165259-7fc72aeffd54 h1:tMnYEgIMt5CKdezrJgnQiE8BYEfId+HZOSwZcgJqTgM=
+github.com/consensys/gnark v0.9.2-0.20240209165259-7fc72aeffd54/go.mod h1:VxJ4yuQPBE2iKFBdkEwxUFr0u70zyz8vRa0kj7T2dTQ=
+github.com/consensys/gnark-crypto v0.12.2-0.20231221171913-5d5eded6bb15 h1:mcxhrDtXKIepsKXofxSuXRst+41yzAcoNWKIotsjMTQ=
+github.com/consensys/gnark-crypto v0.12.2-0.20231221171913-5d5eded6bb15/go.mod h1:wKqwsieaKPThcFkHe0d0zMsbHEUWFmZcG7KBCse210o=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -48,6 +48,10 @@ github.com/google/pprof v0.0.0-20231023181126-ff6d637d2a7b/go.mod h1:czg5+yv1E0Z
 github.com/google/subcommands v1.2.0/go.mod h1:ZjhPrFU+Olkh9WazFPsl27BQ4UPiG37m3yTrtFlrHVk=
 github.com/iden3/go-iden3-crypto v0.0.15 h1:4MJYlrot1l31Fzlo2sF56u7EVFeHHJkxGXXZCtESgK4=
 github.com/iden3/go-iden3-crypto v0.0.15/go.mod h1:dLpM4vEPJ3nDHzhWFXDjzkn1qHoBeOT/3UEhXsEsP3E=
+github.com/ingonyama-zk/icicle v0.0.0-20230928131117-97f0079e5c71 h1:YxI1RTPzpFJ3MBmxPl3Bo0F7ume7CmQEC1M9jL6CT94=
+github.com/ingonyama-zk/icicle v0.0.0-20230928131117-97f0079e5c71/go.mod h1:kAK8/EoN7fUEmakzgZIYdWy1a2rBnpCaZLqSHwZWxEk=
+github.com/ingonyama-zk/iciclegnark v0.1.0 h1:88MkEghzjQBMjrYRJFxZ9oR9CTIpB8NG2zLeCJSvXKQ=
+github.com/ingonyama-zk/iciclegnark v0.1.0/go.mod h1:wz6+IpyHKs6UhMMoQpNqz1VY+ddfKqC/gRwR/64W6WU=
 github.com/klauspost/compress v1.17.2 h1:RlWWUY/Dr4fL8qk9YG7DTZ7PDgME2V4csBXA8L/ixi4=
 github.com/klauspost/compress v1.17.2/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

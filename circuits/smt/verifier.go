@@ -2,8 +2,6 @@ package smt
 
 import (
 	"github.com/consensys/gnark/frontend"
-
-	"github.com/mdehoog/gnark-circom-smt/circuits"
 )
 
 func InclusionVerifier(api frontend.API, root frontend.Variable, siblings []frontend.Variable, key, value frontend.Variable) {
@@ -36,7 +34,7 @@ func Verifier(api frontend.API, enabled, root frontend.Variable, siblings []fron
 	api.AssertIsEqual(api.Add(api.Add(api.Add(stNa[nLevels-1], stIOld[nLevels-1]), stINew[nLevels-1]), stI0[nLevels-1]), 1)
 
 	levels := make([]frontend.Variable, nLevels)
-	for i := nLevels - 1; i != -1; i-- {
+	for i := nLevels - 1; i >= 0; i-- {
 		if i == nLevels-1 {
 			levels[i] = VerifierLevel(api, stTop[i], stIOld[i], stINew[i], siblings[i], hash1Old, hash1New, n2bNew[i], 0)
 		} else {
@@ -44,8 +42,8 @@ func Verifier(api frontend.API, enabled, root frontend.Variable, siblings []fron
 		}
 	}
 
-	areKeyEquals := circuits.IsEqual(api, oldKey, key)
-	keysOk := circuits.MultiAnd(api, []frontend.Variable{fnc, api.Sub(1, isOld0), areKeyEquals, enabled})
+	areKeyEquals := IsEqual(api, oldKey, key)
+	keysOk := MultiAnd(api, []frontend.Variable{fnc, api.Sub(1, isOld0), areKeyEquals, enabled})
 	api.AssertIsEqual(keysOk, 0)
-	circuits.ForceEqualIfEnabled(api, levels[0], root, enabled)
+	ForceEqualIfEnabled(api, levels[0], root, enabled)
 }

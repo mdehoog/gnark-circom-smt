@@ -26,16 +26,16 @@ import (
 const levels = 20
 
 type SMTCircuit struct {
-	Fnc0     frontend.Variable         `gnark:",public"`
-	Fnc1     frontend.Variable         `gnark:",public"`
-	OldKey   frontend.Variable         `gnark:",public"`
-	NewKey   frontend.Variable         `gnark:",public"`
-	IsOld0   frontend.Variable         `gnark:",public"`
-	OldValue frontend.Variable         `gnark:",public"`
-	NewValue frontend.Variable         `gnark:",public"`
-	OldRoot  frontend.Variable         `gnark:",public"`
-	NewRoot  frontend.Variable         `gnark:",public"`
-	Siblings [levels]frontend.Variable `gnark:",public"`
+	Fnc0     frontend.Variable
+	Fnc1     frontend.Variable
+	OldKey   frontend.Variable
+	NewKey   frontend.Variable
+	IsOld0   frontend.Variable
+	OldValue frontend.Variable
+	NewValue frontend.Variable
+	OldRoot  frontend.Variable
+	NewRoot  frontend.Variable
+	Siblings [levels]frontend.Variable
 }
 
 func (circuit *SMTCircuit) Define(api frontend.API) error {
@@ -70,7 +70,7 @@ func main() {
 		HashFunction: arbo.HashFunctionPoseidon,
 	})
 
-	a := smt.NewWrapperArbo(tree, levels)
+	a := smt.NewWrapperArbo(tree, database, levels)
 	input, _ := a.Set(big.NewInt(123), big.NewInt(456))
 
 	var siblings [levels]frontend.Variable
