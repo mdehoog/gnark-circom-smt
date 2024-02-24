@@ -3,7 +3,7 @@ package emulated
 import (
 	"github.com/consensys/gnark/std/math/emulated"
 
-	poseidon "github.com/mdehoog/gnark-circom-smt/circuits/poseidon/emulated"
+	poseidon "github.com/mdehoog/poseidon/circuits/poseidon/emulated"
 )
 
 // based on https://github.com/iden3/circomlib/blob/master/circuits/smt/smthash_poseidon.circom

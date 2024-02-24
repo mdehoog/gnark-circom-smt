@@ -3,11 +3,12 @@ package poseidon
 import (
 	"math/big"
 
+	"github.com/mdehoog/poseidon/poseidon"
 	"go.vocdoni.io/dvote/tree/arbo"
 )
 
 // HashPoseidon implements the HashFunction interface for the Poseidon hash
-type HashPoseidon[E Element[E]] struct {
+type HashPoseidon[E poseidon.Element[E]] struct {
 }
 
 // Type returns the type of HashFunction for the HashPoseidon
@@ -17,7 +18,7 @@ func (HashPoseidon[E]) Type() []byte {
 
 // Len returns the length of the Hash output
 func (HashPoseidon[E]) Len() int {
-	return len(newElement[E]().Marshal())
+	return len(poseidon.NewElement[E]().Marshal())
 }
 
 // Hash implements the hash method for the HashFunction HashPoseidon. It
@@ -29,7 +30,7 @@ func (f HashPoseidon[E]) Hash(b ...[]byte) ([]byte, error) {
 		bi := arbo.BytesToBigInt(b[i])
 		toHash = append(toHash, bi)
 	}
-	h, err := Hash[E](toHash)
+	h, err := poseidon.Hash[E](toHash)
 	if err != nil {
 		return nil, err
 	}

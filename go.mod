@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/consensys/gnark v0.9.2-0.20240209165259-7fc72aeffd54
 	github.com/consensys/gnark-crypto v0.12.2-0.20231221171913-5d5eded6bb15
+	github.com/mdehoog/poseidon v0.0.0-20240224081335-4b88609ec4f8
 	go.vocdoni.io/dvote v1.10.1
 )
 
